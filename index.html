@@ -1,247 +1,255 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<title>Dino Synth Forest</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ancient Synth Forest | 恐竜の幻想的な森</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --forest-deep: #021a14;
+            --emerald-glow: #10b981;
+        }
+        body {
+            background-color: var(--forest-deep);
+            color: #ecfdf5;
+            font-family: 'Cinzel', serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
+        /* パララックスレイヤー */
+        .parallax-wrap { height: 300vh; position: relative; }
+        .layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background-size: cover; background-position: center; pointer-events: none;
+        }
+        .layer-bg { 
+            background: radial-gradient(circle at 50% 50%, #064e3b 0%, #021a14 100%);
+            z-index: 1;
+        }
+        .layer-mid {
+            background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=2000');
+            opacity: 0.3; mix-blend-mode: screen; z-index: 2;
+        }
+        .layer-fg {
+            background-image: url('https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?auto=format&fit=crop&q=80&w=2000');
+            opacity: 0.2; filter: blur(4px); z-index: 3;
+        }
 
-<!-- GSAP -->
-<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-<script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+        /* 霧のエフェクト */
+        .mist {
+            position: fixed; top: 0; left: 0; width: 200%; height: 100%;
+            background: repeat-x url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            opacity: 0.1; z-index: 4; animation: mistMove 60s linear infinite;
+        }
+        @keyframes mistMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-<style>
-html,body{
-  margin:0;
-  height:100%;
-  overflow-x:hidden;
-  background:#02030a;
-  font-family:sans-serif;
-}
+        /* UI */
+        .interface {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            padding: 2rem; z-index: 100;
+            background: linear-gradient(to top, rgba(2,26,20,0.9), transparent);
+        }
 
-/* ===== Forest Background ===== */
-.forest-bg{
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at 50% 30%, #1c2b2a, #02030a 70%),
-    linear-gradient(#041010,#000);
-  overflow:hidden;
-}
+        /* 楽器ボタン */
+        .inst-btn {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            position: relative; overflow: hidden;
+        }
+        .inst-btn.active {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--emerald-glow);
+            box-shadow: 0 0 20px var(--emerald-glow);
+            transform: translateY(-5px);
+        }
+        .inst-btn.active::after {
+            content: ''; position: absolute; inset: 0;
+            background: var(--emerald-glow); opacity: 0.1;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.1; } 50% { opacity: 0.3; } 100% { opacity: 0.1; } }
 
-/* drifting fog */
-.fog{
-  position:absolute;
-  inset:-50%;
-  background:radial-gradient(circle, rgba(255,255,255,.05), transparent 70%);
-  animation:fogmove 60s linear infinite;
-}
-
-@keyframes fogmove{
-  from{transform:translateX(0);}
-  to{transform:translateX(50%);}
-}
-
-/* Parallax Layers */
-.layer{
-  position:absolute;
-  inset:0;
-  background-repeat:no-repeat;
-  background-position:center bottom;
-  background-size:cover;
-}
-
-.layer-back{
-  background-image:
-    radial-gradient(circle at 30% 60%, rgba(0,80,70,.6), transparent 60%);
-}
-.layer-mid{
-  background-image:
-    radial-gradient(circle at 70% 70%, rgba(0,120,100,.6), transparent 60%);
-}
-.layer-front{
-  background-image:
-    radial-gradient(circle at 50% 80%, rgba(0,160,120,.6), transparent 60%);
-}
-
-/* ===== Buttons ===== */
-.synth-btn{
-  width:64px;
-  height:64px;
-  border-radius:9999px;
-  background:#0a3a3a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  cursor:pointer;
-  transition:0.2s;
-  box-shadow:0 0 10px #0ff0;
-}
-
-.synth-btn.active{
-  background:#16f5c4;
-  box-shadow:
-    0 0 20px #3ff,
-    0 0 40px #3ff;
-  animation:pulse 1.2s infinite;
-}
-
-@keyframes pulse{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.1);}
-  100%{transform:scale(1);}
-}
-</style>
+        #entry-screen {
+            position: fixed; inset: 0; z-index: 1000;
+            background: var(--forest-deep);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- Background -->
-<div class="forest-bg">
-  <div class="fog"></div>
-  <div class="layer layer-back"></div>
-  <div class="layer layer-mid"></div>
-  <div class="layer layer-front"></div>
-</div>
+    <div id="entry-screen">
+        <h1 class="text-4xl md:text-6xl mb-8 tracking-widest text-emerald-400">ANCIENT SYNTH</h1>
+        <button id="start-btn" class="px-10 py-4 border-2 border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all duration-500 rounded-full">
+            森の記憶を呼び覚ます
+        </button>
+    </div>
 
-<!-- Spacer for scroll -->
-<div class="h-[300vh]"></div>
+    <div class="parallax-wrap">
+        <div class="layer layer-bg"></div>
+        <div class="mist"></div>
+        <div class="layer layer-mid" id="mid"></div>
+        <div class="layer layer-fg" id="fg"></div>
 
-<!-- UI -->
-<div class="fixed bottom-6 w-full flex justify-center gap-4 z-50">
-  <div class="synth-btn" data-sound="base">🦕</div>
-  <div class="synth-btn" data-sound="perc">🥁</div>
-  <div class="synth-btn" data-sound="high">✨</div>
-  <div class="synth-btn" data-sound="nature">🌿</div>
-  <div class="synth-btn" data-sound="dino">🦖</div>
-</div>
+        <section class="relative z-10 h-screen flex items-center justify-center pointer-events-none">
+            <div class="text-center">
+                <h2 class="text-5xl md:text-8xl opacity-20">THE SILENCE</h2>
+                <p class="text-emerald-500/50 mt-4 tracking-widest">SCROLL & COMPOSE</p>
+            </div>
+        </section>
+        
+        <section class="relative z-10 h-screen flex items-center justify-center pointer-events-none">
+            <h2 class="text-5xl md:text-8xl opacity-20">AWAKENING</h2>
+        </section>
+    </div>
 
-<script>
-/* ================================
-   PARALLAX
-================================ */
-gsap.registerPlugin(ScrollTrigger);
+    <nav class="interface">
+        <div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
+            <button class="inst-btn w-24 h-24 rounded-xl flex flex-col items-center justify-center group" data-inst="0">
+                <span class="text-2xl mb-1">🌋</span>
+                <span class="text-[10px] uppercase tracking-tighter">Base</span>
+            </button>
+            <button class="inst-btn w-24 h-24 rounded-xl flex flex-col items-center justify-center group" data-inst="1">
+                <span class="text-2xl mb-1">👣</span>
+                <span class="text-[10px] uppercase tracking-tighter">Beats</span>
+            </button>
+            <button class="inst-btn w-24 h-24 rounded-xl flex flex-col items-center justify-center group" data-inst="2">
+                <span class="text-2xl mb-1">✨</span>
+                <span class="text-[10px] uppercase tracking-tighter">Sparkle</span>
+            </button>
+            <button class="inst-btn w-24 h-24 rounded-xl flex flex-col items-center justify-center group" data-inst="3">
+                <span class="text-2xl mb-1">🍃</span>
+                <span class="text-[10px] uppercase tracking-tighter">Nature</span>
+            </button>
+            <button class="inst-btn w-24 h-24 rounded-xl flex flex-col items-center justify-center group" data-inst="4">
+                <span class="text-2xl mb-1">🦖</span>
+                <span class="text-[10px] uppercase tracking-tighter">Dino</span>
+            </button>
+        </div>
+    </nav>
 
-gsap.to(".layer-back",{
-  y:100,
-  scrollTrigger:{scrub:true}
-});
-gsap.to(".layer-mid",{
-  y:200,
-  scrollTrigger:{scrub:true}
-});
-gsap.to(".layer-front",{
-  y:300,
-  scrollTrigger:{scrub:true}
-});
+    <script>
+        // --- Web Audio API Engine ---
+        class ForestSynth {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.nodes = []; // { osc, gain, active }
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.connect(this.ctx.destination);
+                this.isInitialized = false;
 
-/* ================================
-   AUDIO ENGINE
-================================ */
+                // 楽器の定義（周波数と波形、名前）
+                this.instSettings = [
+                    { freq: 55, type: 'sine', label: 'Base' },      // Low A
+                    { freq: 110, type: 'square', label: 'Beats' },  // Rhythm
+                    { freq: 880, type: 'triangle', label: 'Synth' }, // High
+                    { freq: 1760, type: 'sine', label: 'Nature' },   // Birds
+                    { freq: 40, type: 'sawtooth', label: 'Dino' }    // Growl
+                ];
+            }
 
-let audioCtx;
-const tracks={};
+            init() {
+                if (this.isInitialized) return;
+                
+                this.instSettings.forEach((setting, i) => {
+                    const gain = this.ctx.createGain();
+                    gain.gain.value = 0;
+                    gain.connect(this.masterGain);
 
-/* simple wav builder so we can still use decodeAudioData */
-function createWavBuffer(samples){
-  const sampleRate=44100;
-  const buffer=new ArrayBuffer(44+samples.length*2);
-  const view=new DataView(buffer);
+                    // オシレーターによるループ音生成（本来はdecodeAudioDataでのループを推奨）
+                    const osc = this.ctx.createOscillator();
+                    const lfo = this.ctx.createOscillator();
+                    const lfoGain = this.ctx.createGain();
 
-  function writeString(o,s){
-    for(let i=0;i<s.length;i++)
-      view.setUint8(o+i,s.charCodeAt(i));
-  }
+                    osc.type = setting.type;
+                    osc.frequency.value = setting.freq;
+                    
+                    // 幻想的な揺らぎを付加
+                    lfo.frequency.value = 0.5 + (i * 0.2);
+                    lfoGain.gain.value = 5;
+                    lfo.connect(lfoGain);
+                    lfoGain.connect(osc.frequency);
 
-  writeString(0,"RIFF");
-  view.setUint32(4,36+samples.length*2,true);
-  writeString(8,"WAVE");
-  writeString(12,"fmt ");
-  view.setUint32(16,16,true);
-  view.setUint16(20,1,true);
-  view.setUint16(22,1,true);
-  view.setUint32(24,sampleRate,true);
-  view.setUint32(28,sampleRate*2,true);
-  view.setUint16(32,2,true);
-  view.setUint16(34,16,true);
-  writeString(36,"data");
-  view.setUint32(40,samples.length*2,true);
+                    osc.start();
+                    lfo.start();
+                    osc.connect(gain);
 
-  let o=44;
-  for(let i=0;i<samples.length;i++,o+=2){
-    let s=Math.max(-1,Math.min(1,samples[i]));
-    view.setInt16(o,s<0?s*0x8000:s*0x7fff,true);
-  }
-  return buffer;
-}
+                    this.nodes.push({ osc, gain, active: false });
+                });
+                this.isInitialized = true;
+            }
 
-/* generate simple loop waves */
-function generateTone(freq){
-  const len=44100*4;
-  const arr=new Float32Array(len);
-  for(let i=0;i<len;i++){
-    arr[i]=Math.sin(2*Math.PI*freq*i/44100)*0.4;
-  }
-  return createWavBuffer(arr);
-}
+            toggle(index) {
+                const node = this.nodes[index];
+                const now = this.ctx.currentTime;
+                node.active = !node.active;
+                
+                // スムーズな音量変化（GainNodeによるフェード）
+                node.gain.gain.setTargetAtTime(node.active ? 0.2 : 0, now, 0.5);
+                return node.active;
+            }
+        }
 
-async function initAudio(){
-  audioCtx=new AudioContext();
+        const synth = new ForestSynth();
 
-  const sources={
-    base:generateTone(55),
-    perc:generateTone(90),
-    high:generateTone(880),
-    nature:generateTone(440),
-    dino:generateTone(30)
-  };
+        // --- GSAP Parallax ---
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.to("#mid", {
+            y: "-20%",
+            scrollTrigger: { scrub: 1 }
+        });
+        gsap.to("#fg", {
+            y: "-50%",
+            scale: 1.2,
+            scrollTrigger: { scrub: 0.5 }
+        });
 
-  for(const key in sources){
-    const audioBuffer=await audioCtx.decodeAudioData(sources[key]);
-    const src=audioCtx.createBufferSource();
-    src.buffer=audioBuffer;
-    src.loop=true;
+        // --- Event Listeners ---
+        document.getElementById('start-btn').addEventListener('click', () => {
+            synth.init();
+            gsap.to("#entry-screen", { 
+                opacity: 0, 
+                duration: 1.5, 
+                onComplete: () => document.getElementById('entry-screen').remove() 
+            });
+        });
 
-    const gain=audioCtx.createGain();
-    gain.gain.value=0;
+        document.querySelectorAll('.inst-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.inst;
+                const isActive = synth.toggle(id);
+                
+                if (isActive) {
+                    this.classList.add('active');
+                    // インタラクティブ・ジングル（きらめき音）を単発で鳴らす
+                    playClickSound();
+                } else {
+                    this.classList.remove('active');
+                }
+            });
+        });
 
-    src.connect(gain).connect(audioCtx.destination);
-    src.start(0); // ★全トラック同期
-
-    tracks[key]={src,gain,active:false};
-  }
-}
-
-document.body.addEventListener("click",async()=>{
-  if(!audioCtx){
-    await initAudio();
-  }
-},{once:true});
-
-/* ================================
-   BUTTON CONTROL
-================================ */
-
-document.querySelectorAll(".synth-btn").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const key=btn.dataset.sound;
-    const track=tracks[key];
-    if(!track) return;
-
-    track.active=!track.active;
-
-    btn.classList.toggle("active",track.active);
-
-    track.gain.gain.cancelScheduledValues(audioCtx.currentTime);
-    track.gain.gain.linearRampToValueAtTime(
-      track.active?0.7:0,
-      audioCtx.currentTime+1
-    );
-  });
-});
-</script>
-
+        function playClickSound() {
+            const ctx = synth.ctx;
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, now);
+            osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+            g.gain.setValueAtTime(0.1, now);
+            g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.connect(g);
+            g.connect(ctx.destination);
+            osc.start();
+            osc.stop(now + 0.1);
+        }
+    </script>
 </body>
 </html>
