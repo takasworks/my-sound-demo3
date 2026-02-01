@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ancient Echoes | 幻想的な恐竜の世界</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Sans+JP:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: #020617;
+            color: #e2e8f0;
+            font-family: 'Noto Sans JP', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2 { font-family: 'Cinzel', serif; }
+
+        /* パララックスコンテナ */
+        .parallax-container {
+            position: relative;
+            height: 400vh; /* スクロール長 */
+            overflow: hidden;
+        }
+
+        .layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+        }
+
+        /* 背景：遠景の山脈と宇宙 */
+        .layer-bg {
+            background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.4), rgba(16, 185, 129, 0.1)),
+                url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000');
+            z-index: 10;
+        }
+
+        /* 中景：霧の恐竜世界 */
+        .layer-mid {
+            background-image: url('https://images.unsplash.com/photo-1517921469444-81604d73edee?auto=format&fit=crop&q=80&w=2000');
+            z-index: 20;
+            opacity: 0.8;
+            filter: blur(2px);
+        }
+
+        /* 前景：植物とUI */
+        .layer-fg {
+            background-image: url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&q=80&w=2000');
+            background-color: transparent;
+            z-index: 30;
+            pointer-events: none;
+            mask-image: linear-gradient(to top, black, transparent);
+        }
+
+        /* 光の筋（ボリューメトリックライト） */
+        .light-ray {
+            position: absolute;
+            top: -50%;
+            left: 20%;
+            width: 200px;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(110, 231, 183, 0.1), transparent);
+            transform: rotate(25deg);
+            pointer-events: none;
+            z-index: 15;
+            filter: blur(40px);
+        }
+
+        /* オーバーレイ */
+        #entry-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: radial-gradient(circle, #064e3b 0%, #020617 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.5s ease;
+        }
+
+        .content-card {
+            position: relative;
+            z-index: 40;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0) translateX(-50%);}
+            40% {transform: translateY(-10px) translateX(-50%);}
+            60% {transform: translateY(-5px) translateX(-50%);}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="entry-overlay">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-7xl mb-8 text-emerald-400 tracking-widest opacity-0" id="title-text">ANCIENT ECHOES</h1>
+            <button id="start-btn" class="px-8 py-4 bg-transparent border border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all duration-500 rounded-full tracking-widest uppercase text-sm">
+                幻想的な恐竜の森へ入る
+            </button>
+        </div>
+    </div>
+
+    <main class="parallax-container">
+        <div class="layer layer-bg" id="bg-layer"></div>
+        <div class="light-ray"></div>
+        <div class="layer layer-mid" id="mid-layer"></div>
+        <div class="layer layer-fg" id="fg-layer"></div>
+
+        <section class="content-card">
+            <h2 class="text-4xl md:text-6xl mb-4 text-emerald-200">Dawn of Ages</h2>
+            <p class="max-w-md text-emerald-100/70">霧深い夜明け。巨大な生命の鼓動が、静寂のなかで響き始める。</p>
+            <div class="scroll-indicator">↓ Scroll to Explore</div>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-4xl md:text-6xl mb-4 text-purple-300">Deep Forest</h2>
+            <p class="max-w-md text-purple-100/70">光る胞子が舞い、古の巨獣たちが草木を分ける音が近づく。</p>
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-4xl md:text-6xl mb-4 text-blue-300">Celestial Temple</h2>
+            <p class="max-w-md text-blue-100/70">そこは生命の根源。星々に見守られた聖なる谷。</p>
+            <button class="mt-8 px-6 py-2 border border-blue-400 text-blue-300 hover:bg-blue-400/20 jingle-trigger">
+                神殿の記憶を呼び覚ます
+            </button>
+        </section>
+    </main>
+
+    <script>
+        // --- Web Audio API 設定 ---
+        let audioCtx;
+        let masterGain, filterNode, reverbNode;
+        let oscillators = [];
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // マスターゲイン
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.3;
+
+            // フィルター（スクロールで制御）
+            filterNode = audioCtx.createBiquadFilter();
+            filterNode.type = 'lowpass';
+            filterNode.frequency.value = 400; // 初期値：こもった音
+
+            // リバーブ（擬似的にConvolverの代わりに長いディレイとフィードバックで幻想感を演出）
+            reverbNode = audioCtx.createDelay();
+            reverbNode.delayTime.value = 0.5;
+            let feedback = audioCtx.createGain();
+            feedback.gain.value = 0.4;
+            reverbNode.connect(feedback);
+            feedback.connect(reverbNode);
+
+            // 接続
+            filterNode.connect(reverbNode);
+            reverbNode.connect(masterGain);
+            masterGain.connect(audioCtx.destination);
+
+            playAmbientPad();
+        }
+
+        // 幻想的なパッド音（アンビエント）の生成
+        function playAmbientPad() {
+            const frequencies = [164.81, 196.00, 220.00]; // E3, G3, A3
+            frequencies.forEach(f => {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = f;
+                g.gain.value = 0.05;
+                osc.connect(g);
+                g.connect(filterNode);
+                osc.start();
+                oscillators.push(osc);
+            });
+        }
+
+        // インタラクティブ・ジングル（きらめき音）
+        function playSparkle() {
+            if(!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(1760, now + 0.1);
+            g.gain.setValueAtTime(0.1, now);
+            g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.connect(g);
+            g.connect(masterGain);
+            osc.start();
+            osc.stop(now + 0.3);
+        }
+
+        // 上昇する和音（神殿ジングル）
+        function playTempleJingle() {
+            const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+            notes.forEach((f, i) => {
+                const now = audioCtx.currentTime + (i * 0.1);
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.frequency.value = f;
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.1, now + 0.1);
+                g.gain.exponentialRampToValueAtTime(0.01, now + 1);
+                osc.connect(g);
+                g.connect(reverbNode);
+                osc.start(now);
+                osc.stop(now + 1.2);
+            });
+        }
+
+        // --- GSAP アニメーション & スクロール制御 ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // タイトルアニメーション
+            gsap.to("#title-text", { opacity: 1, duration: 2, y: -20, ease: "power2.out" });
+
+            // 入場ボタン
+            document.getElementById('start-btn').addEventListener('click', () => {
+                initAudio();
+                gsap.to("#entry-overlay", { opacity: 0, duration: 2, onComplete: () => {
+                    document.getElementById('entry-overlay').style.display = 'none';
+                }});
+            });
+
+            // パララックス・スクロール設定
+            // 背景：ゆっくり
+            gsap.to("#bg-layer", {
+                y: "20%",
+                scrollTrigger: {
+                    trigger: ".parallax-container",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: true
+                }
+            });
+
+            // 中景：標準
+            gsap.to("#mid-layer", {
+                y: "-15%",
+                scale: 1.1,
+                scrollTrigger: {
+                    trigger: ".parallax-container",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1
+                }
+            });
+
+            // 前景：敏感
+            gsap.to("#fg-layer", {
+                y: "-40%",
+                scrollTrigger: {
+                    trigger: ".parallax-container",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 0.5
+                }
+            });
+
+            // オーディオ・フィルター・コントロール
+            // 下にスクロールするほどフィルターが開き、音が明るくなる
+            ScrollTrigger.create({
+                trigger: ".parallax-container",
+                start: "top top",
+                end: "bottom bottom",
+                onUpdate: (self) => {
+                    if (filterNode) {
+                        // 400Hzから2500Hzの間で変化
+                        const freq = 400 + (self.progress * 2100);
+                        filterNode.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+                    }
+                }
+            });
+
+            // UIインタラクション
+            document.querySelectorAll('button, p').forEach(el => {
+                el.addEventListener('mouseenter', playSparkle);
+            });
+
+            document.querySelector('.jingle-trigger').addEventListener('click', playTempleJingle);
+        });
+    </script>
+</body>
+</html>
